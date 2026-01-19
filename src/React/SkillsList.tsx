@@ -68,6 +68,7 @@ const SkillsList = () => {
             <div
               onClick={() => toggleItem(category)}
               className="md:w-[400px] w-full bg-[#1414149c] rounded-2xl text-left hover:bg-opacity-80 transition-all border border-[var(--white-icon-tr)] cursor-pointer overflow-hidden"
+              style={{ willChange: 'transform, opacity' }}
             >
               <div className="flex items-center gap-3 p-4">
                 {CategoryIcons[category]}
@@ -84,6 +85,7 @@ const SkillsList = () => {
                     className={`w-6 h-6 text-[var(--white)] transform transition-transform flex-shrink-0 ${
                       openItem === category ? "rotate-180" : ""
                     }`}
+                    style={{ willChange: 'transform' }}
                   >
                     <path d="M11.9999 13.1714L16.9497 8.22168L18.3639 9.63589L11.9999 15.9999L5.63599 9.63589L7.0502 8.22168L11.9999 13.1714Z"></path>
                   </svg>
@@ -99,10 +101,10 @@ const SkillsList = () => {
               >
                 <ul className="space-y-2 text-[var(--white-icon)] text-sm">
                   {items.map((item, index) => (
-                    <div key={index} className="flex items-center">
+                    <li key={index} className="flex items-center">
                       <span className="pl-1">•</span>
-                      <li className="pl-3">{item}</li>
-                    </div>
+                      <span className="pl-3">{item}</span>
+                    </li>
                   ))}
                 </ul>
               </div>

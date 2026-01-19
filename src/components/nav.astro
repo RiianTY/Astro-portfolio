@@ -38,6 +38,7 @@ const navItems: NavItem[] = [
             <li class="flex-1 md:flex-none">
               <a
                 href={item.href}
+                aria-label={item.label}
                 class="flex flex-col items-center gap-1 text-[var(--white-icon)] transition-colors text-xs md:text-base relative group"
               >
                 <div class="absolute -left-6 top-1/2 -translate-y-1/2 w-2 h-2 rounded-full transition-all duration-300 scale-0 opacity-0 bg-[rgba(0,255,229,1.0)] nav-indicator hidden md:block" />
@@ -101,57 +102,62 @@ const navItems: NavItem[] = [
   }
 </style>
 
-<script>
-  const nav = document.getElementById("main-nav");
-  const maxScroll = 1000;
-  let rafId: number | null = null;
-
-  function updateNav() {
-    if (window.scrollY > 0) {
-      nav?.classList.add("scrolling");
-
-      const scrollProgress = Math.min(window.scrollY / maxScroll, 1);
-      const easeProgress = 1 - Math.pow(1 - scrollProgress, 4);
-
-      const minWidth = 528;
-      const maxWidth = window.innerWidth * 0.8;
-      const currentWidth = maxWidth - (maxWidth - minWidth) * easeProgress;
-
-      if (window.innerWidth >= 768) {
-        nav?.style.setProperty("width", `${currentWidth}px`);
-      }
-    } else {
-      nav?.classList.remove("scrolling");
-      nav?.style.setProperty("width", "80%");
-    }
-    rafId = null;
-  }
-
-  window.addEventListener(
-    "scroll",
-    () => {
-      if (!rafId) {
-        rafId = requestAnimationFrame(updateNav);
-      }
-    },
-    { passive: true }
-  );
-
-  document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
-    anchor.addEventListener("click", function (e) {
-      e.preventDefault();
-      const target = e.currentTarget as HTMLAnchorElement;
-      const targetId = target.getAttribute("href")?.substring(1) || "";
-      const targetElement = document.getElementById(targetId);
-      if (targetElement) {
-        targetElement.scrollIntoView({
-          behavior: "smooth",
-        });
-      }
-    });
-  });
-
+<script is:inline>
   document.addEventListener("DOMContentLoaded", () => {
+    const nav = document.getElementById("main-nav");
+    const maxScroll = 1000;
+    let rafId = null;
+
+    function updateNav() {
+      if (window.scrollY > 0) {
+        nav?.classList.add("scrolling");
+
+        const scrollProgress = Math.min(window.scrollY / maxScroll, 1);
+        const easeProgress = 1 - Math.pow(1 - scrollProgress, 4);
+
+        const minWidth = 528;
+        const maxWidth = window.innerWidth * 0.8;
+        const currentWidth = maxWidth - (maxWidth - minWidth) * easeProgress;
+
+        if (window.innerWidth >= 768) {
+          nav?.style.setProperty("width", `${currentWidth}px`);
+        }
+      } else {
+        nav?.classList.remove("scrolling");
+        nav?.style.setProperty("width", "80%");
+      }
+      rafId = null;
+    }
+
+    window.addEventListener(
+      "scroll",
+      () => {
+        if (!rafId) {
+          rafId = requestAnimationFrame(updateNav);
+        }
+      },
+      { passive: true }
+    );
+
+    // Optimize nav for composited animations
+    if (nav) {
+      nav.style.willChange = "transform, width";
+    }
+
+    document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
+      anchor.addEventListener("click", function (e) {
+        e.preventDefault();
+        const target = e.currentTarget;
+        const targetId = target.getAttribute("href")?.substring(1) || "";
+        const targetElement = document.getElementById(targetId);
+        if (targetElement) {
+          targetElement.scrollIntoView({
+            behavior: "smooth",
+          });
+        }
+      });
+    });
+
     const sections = document.querySelectorAll("section[id]");
     const navLinks = document.querySelectorAll("nav a[href^='#']");
     const observerOptions = { threshold: 0.6 };
