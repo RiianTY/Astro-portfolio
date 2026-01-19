@@ -1,4 +1,4 @@
-import { useRef, useEffect } from "react";
+import { useRef, useEffect, useState } from "react";
 
 const LetterGlitch = ({
   glitchColors = ["rgba(0, 255, 229, 0.3)", "rgba(0, 255, 229, 0.6)", "rgba(0, 255, 229, 1.0)"],
@@ -26,6 +26,7 @@ const LetterGlitch = ({
   const grid = useRef({ columns: 0, rows: 0 });
   const context = useRef<CanvasRenderingContext2D | null>(null);
   const lastGlitchTime = useRef(Date.now());
+  const [isPageLoaded, setIsPageLoaded] = useState(false);
 
   const fontSize = 16;
   const charWidth = 10;
@@ -268,6 +269,25 @@ const LetterGlitch = ({
   };
 
   useEffect(() => {
+    // Wait for page to be fully loaded
+    const handleLoad = () => {
+      setIsPageLoaded(true);
+    };
+
+    if (document.readyState === "complete") {
+      setIsPageLoaded(true);
+    } else {
+      window.addEventListener("load", handleLoad);
+    }
+
+    return () => {
+      window.removeEventListener("load", handleLoad);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!isPageLoaded) return;
+
     const canvas = canvasRef.current;
     if (!canvas) return;
 
@@ -293,7 +313,7 @@ const LetterGlitch = ({
       window.removeEventListener("resize", handleResize);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [glitchSpeed, smooth]);
+  }, [glitchSpeed, smooth, isPageLoaded]);
 
   return (
     <div className="relative w-full h-full bg-[#101010] overflow-hidden" style={{ willChange: 'transform' }}>
